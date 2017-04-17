@@ -1,0 +1,246 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/zhevron/gulp-deploy-git"
+
+    >gulp-deploy-git (v0.5.3)</a>
+</h1>
+<h4>Deploy Git projects to remote Git repositories.</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.gulp-deploy-git">module gulp-deploy-git</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-deploy-git.gulp-deploy-git">
+            function <span class="apidocSignatureSpan"></span>gulp-deploy-git
+            <span class="apidocSignatureSpan">(options)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-deploy-git.toString">
+            function <span class="apidocSignatureSpan">gulp-deploy-git.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.gulp-deploy-git" id="apidoc.module.gulp-deploy-git">module gulp-deploy-git</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-deploy-git.gulp-deploy-git" id="apidoc.element.gulp-deploy-git.gulp-deploy-git">
+        function <span class="apidocSignatureSpan"></span>gulp-deploy-git
+        <span class="apidocSignatureSpan">(options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">gulp-deploy-git = function (options) {
+  options = assign({}, {
+    prefix: &#x27;&#x27;,
+    message: &#x27;&#x27;,
+    repository: &#x27;&#x27;,
+    remoteBranch: &#x27;master&#x27;,
+    branches: [&#x27;master&#x27;],
+    verbose: false,
+    debug: false
+  }, options);
+
+  options.prefix = options.prefix.replace(&#x27;/&#x27;, path.sep);
+
+  const PLUGIN_NAME = &#x27;gulp-deploy-git&#x27;;
+
+  var branch = null;
+  var files = [];
+  var repoPath = path.normalize(path.join(process.cwd(), &#x27;deploy-&#x27; + Date.now()));
+
+  return through.obj(function(file, enc, callback) {
+    if (file.isBuffer()) {
+      return callback(&#x27;Buffers are not supported&#x27;);
+    }
+    var p = path.normalize(path.relative(file.cwd, file.path));
+    if (options.debug) gutil.log(gutil.colors.magenta(&#x27;processing file: &#x27;) + p);
+    if (options.prefix.length &#x3e; 0 &#x26;&#x26; p.indexOf(options.prefix) === 0) {
+      p = p.substr(options.prefix.length + 1);
+      if (options.debug) gutil.log(gutil.colors.magenta(&#x27;  stripped prefix to: &#x27;) + p);
+    }
+    files.push({
+      path: file.path,
+      dest: path.join(repoPath, p)
+    });
+    callback(null, file);
+  }, function(done) {
+    async.waterfall([
+      function checkBranch(callback) {
+        if (process.env[&#x27;GIT_BRANCH&#x27;] === undefined) {
+          cmdRevParse = spawn(&#x27;git&#x27;, [&#x27;rev-parse&#x27;, &#x27;--abbrev-ref&#x27;, &#x27;HEAD&#x27;]);
+          cmdRevParse.stderr.on(&#x27;data&#x27;, function(data) {
+            if (options.verbose || options.debug) gutil.log(gutil.colors.magenta(&#x27;git rev-parse: &#x27;) + data.toString().trim());
+          });
+          cmdRevParse.stdout.on(&#x27;data&#x27;, function(data) {
+            if (options.verbose || options.debug) gutil.log(gutil.colors.magenta(&#x27;git rev-parse: &#x27;) + data.toString().trim());
+            branch = data.toString().trim();
+            if (branch.indexOf(&#x27;refs/heads/&#x27;) &#x3e; -1) {
+              branch = branch.substr(branch.lastIndexOf(&#x27;refs/heads/&#x27;) + 1);
+            }
+            gutil.log(gutil.colors.yellow(&#x27;Current branch: &#x27; + branch));
+          });
+          cmdRevParse.on(&#x27;close&#x27;, function(code) {
+            if (code !== 0) {
+              return callback(&#x27;git rev-parse exited with code &#x27; + code);
+            }
+            var found = false;
+            options.branches.forEach(function (b) {
+              if (branch === b) {
+                found = true;
+              }
+            });
+            if (!found) {
+              return callback(&#x27;doNotDeployBranch&#x27;);
+            }
+            callback(null);
+          });
+        } else {
+          branch = process.env[&#x27;GIT_BRANCH&#x27;];
+          if (branch.indexOf(&#x27;refs/heads/&#x27;) &#x3e; -1) {
+            branch = branch.substr(branch.lastIndexOf(&#x27;refs/heads/&#x27;) + 11);
+          }
+          var found = false;
+          options.branches.forEach(function (b) {
+            if (branch === b) {
+              found = true;
+            }
+          });
+          if (!found) {
+            return callback(&#x27;doNotDeployBranch&#x27;);
+          }
+          callback(null);
+        }
+      },
+      function gitClone(callback) {
+        gutil.log(gutil.colors.yellow(&#x27;Cloning remote deployment repository&#x27;));
+        var cmdClone = spawn(&#x27;git&#x27;, [&#x27;clone&#x27;, &#x27;-b&#x27;, options.remoteBranch, &#x27;--single-branch&#x27;, options.repository, repoPath]);
+        cmdClone.on(&#x27;data&#x27;, function(data) { gutil.log(data.toString()); });
+        cmdClone.stderr.on(&#x27;data&#x27;, function(data) {
+          if (options.verbose || options.debug) gutil.log(gutil.colors.magenta(&#x27;git clone: &#x27;) + data.toString().trim());
+        });
+        cmdClone.stdout.on(&#x27;data&#x27;, function(data) {
+          if (options.verbose || options.debug) gutil.log(gutil.colors.magenta(&#x27;git clone: &#x27;) + data.toString().trim());
+        });
+        cmdClone.on(&#x27;close&#x27;, function(code) {
+          if (code !== 0) {
+            return callback(&#x27;git clone exited with code &#x27; + code);
+          }
+          return callback(null);
+        });
+      },
+      function removeFiles(callback) {
+        gutil.log(gutil.colors.yellow(&#x27;Cleaning deployment repository folder&#x27;));
+        var clean = function(folder) {
+          fs.readdirSync(folder).forEach(function(file) {
+            var filePath = path.normalize(path.join(folder, file));
+            stats = fs.ls ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-deploy-git.toString" id="apidoc.element.gulp-deploy-git.toString">
+        function <span class="apidocSignatureSpan">gulp-deploy-git.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+  callback(null, file);
+}, function(done) {
+  async.waterfall([
+    function checkBranch(callback) {
+      if (process.env[&#x27;GIT_BRANCH&#x27;] === undefined) {
+        cmdRevParse = spawn(&#x27;git&#x27;, [&#x27;rev-parse&#x27;, &#x27;--abbrev-ref&#x27;, &#x27;HEAD&#x27;]);
+        cmdRevParse.stderr.on(&#x27;data&#x27;, function(data) {
+          if (options.verbose || options.debug) gutil.log(gutil.colors.magenta(&#x27;git rev-parse: &#x27;) + data.<span class="
+apidocCodeKeywordSpan">toString</span>().trim());
+        });
+        cmdRevParse.stdout.on(&#x27;data&#x27;, function(data) {
+          if (options.verbose || options.debug) gutil.log(gutil.colors.magenta(&#x27;git rev-parse: &#x27;) + data.toString().trim
+());
+          branch = data.toString().trim();
+          if (branch.indexOf(&#x27;refs/heads/&#x27;) &#x3e; -1) {
+            branch = branch.substr(branch.lastIndexOf(&#x27;refs/heads/&#x27;) + 1);
+          }
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
