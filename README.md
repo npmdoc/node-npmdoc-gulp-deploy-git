@@ -1,4 +1,7 @@
-# api documentation for  [gulp-deploy-git (v0.5.3)](https://github.com/zhevron/gulp-deploy-git)  [![npm package](https://img.shields.io/npm/v/npmdoc-gulp-deploy-git.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-gulp-deploy-git) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-gulp-deploy-git.svg)](https://travis-ci.org/npmdoc/node-npmdoc-gulp-deploy-git)
+# npmdoc-gulp-deploy-git
+
+#### basic api documentation for  [gulp-deploy-git (v0.5.3)](https://github.com/zhevron/gulp-deploy-git)  [![npm package](https://img.shields.io/npm/v/npmdoc-gulp-deploy-git.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-gulp-deploy-git) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-gulp-deploy-git.svg)](https://travis-ci.org/npmdoc/node-npmdoc-gulp-deploy-git)
+
 #### Deploy Git projects to remote Git repositories.
 
 [![NPM](https://nodei.co/npm/gulp-deploy-git.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/gulp-deploy-git)
@@ -62,7 +65,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "version": "0.5.3"
+    "version": "0.5.3",
+    "bin": {}
 }
 ```
 
