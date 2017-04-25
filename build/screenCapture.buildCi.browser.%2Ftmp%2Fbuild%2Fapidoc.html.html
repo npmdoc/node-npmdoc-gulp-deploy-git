@@ -63,15 +63,6 @@
 
         </li>
 
-        <li>
-
-            <a class="apidocElementLiA" href="#apidoc.element.gulp-deploy-git.toString">
-            function <span class="apidocSignatureSpan">gulp-deploy-git.</span>toString
-            <span class="apidocSignatureSpan">()</span>
-            </a>
-
-        </li>
-
     </ol></li>
 
 </ol></div>
@@ -193,39 +184,6 @@
             var filePath = path.normalize(path.join(folder, file));
             stats = fs.ls ...</pre></li>
     <li>example usage<pre class="apidocCodePre">n/a</pre></li>
-    </ul>
-
-
-
-    <h2>
-        <a href="#apidoc.element.gulp-deploy-git.toString" id="apidoc.element.gulp-deploy-git.toString">
-        function <span class="apidocSignatureSpan">gulp-deploy-git.</span>toString
-        <span class="apidocSignatureSpan">()</span>
-        </a>
-    </h2>
-    <ul>
-    <li>description and source-code<pre class="apidocCodePre">toString = function () {
-    return text;
-}</pre></li>
-    <li>example usage<pre class="apidocCodePre">...
-  callback(null, file);
-}, function(done) {
-  async.waterfall([
-    function checkBranch(callback) {
-      if (process.env['GIT_BRANCH'] === undefined) {
-        cmdRevParse = spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
-        cmdRevParse.stderr.on('data', function(data) {
-          if (options.verbose ||Â&nbsp;options.debug) gutil.log(gutil.colors.magenta('git rev-parse: ') + data.<span class="
-apidocCodeKeywordSpan">toString</span>().trim());
-        });
-        cmdRevParse.stdout.on('data', function(data) {
-          if (options.verbose ||Â&nbsp;options.debug) gutil.log(gutil.colors.magenta('git rev-parse: ') + data.toString().trim
-());
-          branch = data.toString().trim();
-          if (branch.indexOf('refs/heads/') &gt; -1) {
-            branch = branch.substr(branch.lastIndexOf('refs/heads/') + 1);
-          }
-...</pre></li>
     </ul>
 
 
